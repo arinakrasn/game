@@ -47,6 +47,10 @@ def my_words():
         words_for_game.append(word)
     return redirect('/game')
 
+@app.route('/reset')
+def reset():
+    words_for_game.clear()
+    return "reset"
 
 @app.route('/game')
 def game():
