@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        html{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="wait_for_round">
+    <button style="padding: 50px; margin: 50px " onclick="go_to_game()">Начать раунд</button>
+    <p id="points_on_wait_page"></p>
+</div>
+
+<div id="round" style="display: none;">
+    <p id="time_now"></p>
+    <p id="new_word"></p>
+    <p id="points_for_game"></p>
+
+    <button onclick="points()">Отгадал</button>
+    <button onclick="cancel()">Не отгадал</button>
+</div>
+<div id="the_end" style="display: none;">
+    <h1>Конец игры...</h1>
+    <h2>Баллы</h2>
+    <p id="points_on_last_page"></p>
+</div>
+
+
+<script>
+    document.getElementById("points_for_game").innerHTML = "0"
+    function go_to_game() {
+        document.getElementById("wait_for_round").style.display = "none";
+        document.getElementById("round").style.display = "block";
+        setTimeout(timer, 500)
+    }
+
+    function update_word(response) {
+        // handle success
+        current_word = response.data;
+        document.getElementById("new_word").innerHTML = "<strong>" + current_word +
+            "</strong>"
+
+    }
+
+
+    axios.get('/api/word')
+        .then(update_word);
+
+    var time = 30
+
+    function timer() {
+        if (time > 0) {
+            if (current_word != "no words") {
+                time -= 1
+                document.getElementById("time_now").innerHTML = time
+                setTimeout(timer, 1000)
+            }
+            else{
+                document.getElementById("round").style.display = "none";
+                document.getElementById("the_end").style.display = "block";
+            }
+        }
+        else {
+            if (current_word == "no words") {
+                document.getElementById("round").style.display = "none";
+                document.getElementById("the_end").style.display = "block";
+            }
+            else{
+                document.getElementById("round").style.display = "none";
+                document.getElementById("wait_for_round").style.display = "block";
+                scores = 0
+                time = 30
+            }
+        }
+    }
+
+    var scores = 0;
+    var current_word = "";
+
+    function points() {
+        scores += 1;
+        document.getElementById("points_on_wait_page").innerHTML = scores
+        document.getElementById("points_for_game").innerHTML = scores
+        document.getElementById("points_on_last_page").innerHTML = scores
+        var params = new URLSearchParams();
+        params.append('word', current_word);
+        axios.post('/api/delete', params)
+        axios.get('/api/word')
+        .then(update_word);
+    }
+    function cancel() {
+        axios.get('/api/word')
+            .then(update_word);
+    }
+</script>
+
+</body>
+</html>
