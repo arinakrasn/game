@@ -83,4 +83,4 @@ def delete_word():
 # #     id = request.form.get("id")
 # #     return redirect(f'/game/{ id }')
 
-app.run(debug=True)
+app.run(debug=False, host="0.0.0.0", port=8081)
